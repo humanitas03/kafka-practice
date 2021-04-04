@@ -1,0 +1,44 @@
+server:
+  port: 9090
+spring:
+  application:
+    name: kafka-demo
+  cloud:
+    function: consumeTest;
+    stream:
+      bindings:
+        consumeTest-out-0:
+          destination: mytopic
+          producer:
+            configuration:
+              linger.ms: 10
+              batch.size: 1000
+#              key.serializer: org.apache.kafka.common.serialization.StringSerializer
+#              value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#          consumeTest-out-0: consumeTest-in-0
+          kafka:
+            bindings:
+#              # topics define
+              consumeTest-out-0:
+                destination: mytopic
+              producer:
+                configuration:
+                  linger.ms: 10
+                  batch.size: 1000
+#                  key.serializer: org.apache.kafka.common.serialization.StringSerializer
+#                  value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      kafka:
+        binder:
+          brokers: localhost
+          default-broker-port: 9092
+          auto-create-topics: false
+        bindings:
+          # topics define
+          consumeTest-out-0:
+            destination: mytopic
+            producer:
+              configuration:
+                linger.ms: 10
+                batch.size: 1000
+#                key.serializer: org.apache.kafka.common.serialization.StringSerializer
+#                value.serializer: org.springframework.kafka.support.serializer.JsonSerializer

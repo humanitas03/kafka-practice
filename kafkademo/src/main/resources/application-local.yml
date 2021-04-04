@@ -1,0 +1,10 @@
+spring:
+  profiles:
+    active: local
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost
+          default-broker-port: 9092
+          auto-create-topics: true

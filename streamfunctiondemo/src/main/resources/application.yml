@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: kafka-demo
+  cloud:
+    function:
+      definition: publishTest;consumeTest #define bean this.
+    stream:
+      bindings:
+        # topics define
+        publishTest-out-0:
+          destination: yourtopic
+        consumeTest-in-0:
+          destination: mytopic
+          consumer:
+            maxAttempts: 1
+            batch-mode: true
+            concurrency: 1
+      kafka:
+        binder:
+          brokers: localhost
+          default-broker-port: 9092
+          auto-create-topics: false
+        bindings:
+          consumeTest-in-0:
+            consumer:
+              autoCommitOffset: true
+              configuration:
+                max.poll.records: 800
+                enable.auto.commit: false # Batch 모드로 Consume시 auto-commit disable
+                fetch.min.bytes: 540000
+                fetch.max.wait.ms: 400
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_versioned_data: true
+          batch_size: 500
+        order_insert: true
+        generate_statistics: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydb
+    username: user
+    password: test
+
+
