@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ForkJoinPool;
 
 @RestController
 public class KafkaDemoController {
@@ -27,8 +28,11 @@ public class KafkaDemoController {
     @GetMapping("/test/{maxCount}")
     public void produceTest(@PathVariable int maxCount){
         long start = System.currentTimeMillis();
-        this.personGenerator(maxCount)
-                .forEach(it->this.streamBridge.send(myDestination,it));
+        this.personGenerator(maxCount).stream().parallel()
+                .forEach(it->{
+//                    System.out.println("Thread : "+Thread.currentThread().getName()+", value : " + it.getName());
+                    this.streamBridge.send(myDestination,it);
+                });
         System.out.println("api lead time : "+(System.currentTimeMillis()-start));
     }
 
