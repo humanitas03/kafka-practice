@@ -28,12 +28,13 @@ public class KafkaDemoController {
     @GetMapping("/test/{maxCount}")
     public void produceTest(@PathVariable int maxCount){
         long start = System.currentTimeMillis();
-        this.personGenerator(maxCount).stream().parallel()
+        this.personGenerator(maxCount)
+                .stream().parallel()
                 .forEach(it->{
 //                    System.out.println("Thread : "+Thread.currentThread().getName()+", value : " + it.getName());
                     this.streamBridge.send(myDestination,it);
                 });
-        System.out.println("api lead time : "+(System.currentTimeMillis()-start));
+        System.out.println("api exec time : "+(System.currentTimeMillis()-start));
     }
 
     private List<Person> personGenerator(int maxCnt){
@@ -52,15 +53,9 @@ public class KafkaDemoController {
             String phoneNumber = "010".concat(RandomStringUtils.random(8,33,125,false,true));
 
 
-
-            res.add(Person.builder()
-                    .name(randName)
-                    .gender(randGender)
-                    .age(rand.nextInt(100))
-                    .phoneNumber(phoneNumber)
-                    .build());
+            res.add(Person.of(randName,randGender,rand.nextInt(100),phoneNumber));
         }
-        System.out.println("generator lead time : " + (System.currentTimeMillis()-start));
+        System.out.println("generator exec time : " + (System.currentTimeMillis()-start));
         return res;
     }
 

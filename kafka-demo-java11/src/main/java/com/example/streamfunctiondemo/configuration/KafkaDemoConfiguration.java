@@ -1,14 +1,13 @@
 package com.example.streamfunctiondemo.configuration;
 
+import com.example.streamfunctiondemo.repository.BatchInsertRepository;
 import com.example.streamfunctiondemo.repository.Person;
-import com.example.streamfunctiondemo.repository.PersonRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 import reactor.util.concurrent.Queues;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -18,10 +17,10 @@ public class KafkaDemoConfiguration {
 
     private final Sinks.Many<String> emitter = Sinks.many().multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, true);
 
-    private final PersonRepository repository;
 
-    public KafkaDemoConfiguration(PersonRepository repository) {
-        this.repository = repository;
+    private final BatchInsertRepository batchInsertRepository;
+    public KafkaDemoConfiguration(BatchInsertRepository batchInsertRepository) {
+        this.batchInsertRepository = batchInsertRepository;
     }
 
     @Bean
@@ -29,17 +28,20 @@ public class KafkaDemoConfiguration {
         return emitter::asFlux;
     }
 
-
-    @Bean Consumer<List<Person>> consumeTest(){
-        return this::batchInsert;
+    @Bean public Consumer<List<Person>> consumeTest() {
+        return it->{
+            try{
+                long start = System.currentTimeMillis();
+                this.batchInsertRepository.batchInsertByJdbcTemplate(it);
+//                System.out.println("==>List size  : "+ it.size());
+//                System.out.println("==>Finish Insert : "+ (System.currentTimeMillis()-start) + " ms");
+            }catch(Exception e){
+                System.out.println("======Error=====");
+                System.out.println(e.getMessage());
+            }
+        };
     }
 
-    private void batchInsert(List<Person> messages){
-        System.out.println("Insert to DB ===> list size : "+ messages.size());
-        long start = System.currentTimeMillis();
-        String res = this.repository.saveAll(messages).toString();
-        System.out.println("[Batch Insert Time]===> " + (System.currentTimeMillis()-start)/1000.0);
-    }
 
 }
 

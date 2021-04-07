@@ -25,7 +25,7 @@ class StreamFunctiondemoApplicationTests {
     @Test
     void contextLoads() {
         List<Person> testList = new ArrayList<>();
-        testList.add(Person.builder().name("test").age(10).gender("M").phoneNumber("000000000").build());
+        testList.add(Person.of("test","M",10,"00000000000"));
         assertDoesNotThrow(()->input.send(new GenericMessage<List<Person>>(testList)));
     }
 
