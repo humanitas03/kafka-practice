@@ -1,0 +1,53 @@
+server:
+  port: 11000
+
+spring:
+  application:
+    name: kafka-multi-channel
+  cloud:
+    function:
+      definition: multiChannelConsumer
+    stream:
+      bindings:
+        multiChannelConsumer-in-0:
+          destination: multi.topic1
+          consumer:
+            batch-mode: true
+            group: multitopic
+            configuration:
+              max.poll.records: 20
+              enable.auto.commit: false
+              fetch.max.wait.ms: 200
+        multiChannelConsumer-in-1:
+          destination: multi.topic2
+          consumer:
+            batch-mode: true
+            group: multitopic
+            configuration:
+              max.poll.records: 30
+              enable.auto.commit: false
+              fetch.max.wait.ms: 200
+        multiChannelConsumer-in-2:
+          destination: multi.topic3
+          consumer:
+            batch-mode: true
+            group: multitopic
+            configuration:
+              max.poll.records: 40
+              enable.auto.commit: false
+              fetch.max.wait.ms: 200
+      kafka:
+        binder:
+          brokers: localhost
+          default-broker-port: 9092
+          auto-create-topics: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+  datasource:
+    url: jdbc:h2:file:~/db/testdb;AUTO_SERVER=TRUE
+    username: user
+    password: test
+    driver-class-name: org.h2.Driver
