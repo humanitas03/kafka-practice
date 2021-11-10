@@ -1,11 +1,17 @@
 package com.example.streamfunctiondemo.controller;
 
+import com.example.streamfunctiondemo.repository.BatchInsertRepository;
 import com.example.streamfunctiondemo.repository.Person;
+import com.example.streamfunctiondemo.repository.PersonRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -18,6 +24,12 @@ public class KafkaDemoController {
 
     @Autowired
     private StreamBridge streamBridge;
+
+    @Autowired
+    private PersonRepository personRepository;
+
+    @Autowired
+    private BatchInsertRepository batchInsertRepository;
 
     private final String myDestination = "mytopic";
 
@@ -57,6 +69,20 @@ public class KafkaDemoController {
         }
         System.out.println("generator exec time : " + (System.currentTimeMillis()-start));
         return res;
+    }
+
+
+    @PostMapping("/resttest")
+    public void receiveMessageApi(@RequestBody Person person){
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try{
+            System.out.println("===> Recieved Message : "+ objectMapper.writeValueAsString(person));
+            this.personRepository.save(person);
+        }catch(Exception e){
+            System.out.println("======Error=====");
+            System.out.println(e.getMessage());
+        }
     }
 
 }

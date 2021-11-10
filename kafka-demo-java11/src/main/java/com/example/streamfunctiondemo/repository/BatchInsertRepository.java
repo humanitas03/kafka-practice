@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Transactional
@@ -30,7 +32,8 @@ public class BatchInsertRepository {
     *  batch insert 처리.
     * */
     public void batchInsertByJdbcTemplate(List<Person> messages) throws Exception{
-        String sql = " insert into person (id, age, gender, name, phone_number) values (nextval('hibernate_sequence'),?,?,?,?)".trim();
+        String sql = (" insert into person (id, age, gender, name, phone_number, message, created_at, updated_at) " +
+                "values (nextval('SEQ_PERSON'),?,?,?,?,?,?,?)").trim();
 
         DataSource datasource = jdbcTemplate.getDataSource();
         Connection connection = datasource.getConnection();
@@ -46,6 +49,10 @@ public class BatchInsertRepository {
             ps.setString(2,person.getGender());
             ps.setString(3,person.getName());
             ps.setString(4,person.getPhoneNumber());
+            ps.setString(5, person.getMessage());
+            // audit 기능 추가
+            ps.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
             ps.addBatch();
             count +=1;
             if(count % batchSize==0 || count == messages.size()){

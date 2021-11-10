@@ -5,39 +5,35 @@ spring:
     function:
       definition: publishTest;consumeTest #define bean this.
     stream:
-      bindings:
-        # topics define
-        publishTest-out-0:
-          destination: yourtopic
-        consumeTest-in-0:
-          destination: mytopic
-          consumer:
-            maxAttempts: 1
-            batch-mode: true
-            concurrency: 1
       kafka:
         binder:
           brokers: localhost
           default-broker-port: 9092
-          auto-create-topics: false
-        bindings:
-          consumeTest-in-0:
-            consumer:
-              autoCommitOffset: true
-              configuration:
-                max.poll.records: 800
-                enable.auto.commit: false # Batch ���� Consume�� auto-commit disable
-                fetch.min.bytes: 540000
-                fetch.max.wait.ms: 400
+          auto-create-topics: true
+      bindings:
+        publishTest-out-0:
+          destination: yourtopic
+        consumeTest-in-0:
+          destination: mytopic
+          group: mygroup
+          consumer:
+            batch-mode: true
+#              autoCommitOffset: true
+            configuration:
+              auto.offset.reset: latest
+              max.poll.records: 800
+              enable.auto.commit: false # Batch ���� Consume�� auto-commit disable
+              fetch.min.bytes: 540000
+              fetch.max.wait.ms: 400
 
   jpa:
     hibernate:
       ddl-auto: create
-    show-sql: true
+#    show-sql: true
     properties:
       hibernate:
         jdbc:
-#          batch_versioned_data: true
+          batch_versioned_data: true
           fetch_size: 200
 #          batch_size: 200
         order_insert: true
@@ -53,6 +49,6 @@ spring:
 
 logging:
   level:
-    # p6spy 로깅 확인을 위해서는 info로 지정.
-    p6spy: off
+    # p6spy 로깅 확인을 위해서는 info로 지정. - 끌때는 off
+    p6spy: INFO
 

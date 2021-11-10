@@ -2,6 +2,9 @@ package com.example.streamfunctiondemo.configuration;
 
 import com.example.streamfunctiondemo.repository.BatchInsertRepository;
 import com.example.streamfunctiondemo.repository.Person;
+import com.example.streamfunctiondemo.repository.PersonRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Flux;
@@ -19,8 +22,11 @@ public class KafkaDemoConfiguration {
 
 
     private final BatchInsertRepository batchInsertRepository;
-    public KafkaDemoConfiguration(BatchInsertRepository batchInsertRepository) {
+    private final PersonRepository personRepository;
+
+    public KafkaDemoConfiguration(BatchInsertRepository batchInsertRepository,PersonRepository personRepository) {
         this.batchInsertRepository = batchInsertRepository;
+        this.personRepository = personRepository;
     }
 
     @Bean
@@ -29,12 +35,21 @@ public class KafkaDemoConfiguration {
     }
 
     @Bean public Consumer<List<Person>> consumeTest() {
+            ObjectMapper objectMapper = new ObjectMapper();
+
         return it->{
             try{
-                long start = System.currentTimeMillis();
+                it.stream().forEach(person-> {
+                    try {
+                        System.out.println("===> Recieved Message : "+ objectMapper.writeValueAsString(person));
+                    } catch (JsonProcessingException e) {
+//                        e.printStackTrace();
+                        System.out.println(e.getMessage());
+                    }
+                });
+
                 this.batchInsertRepository.batchInsertByJdbcTemplate(it);
-//                System.out.println("==>List size  : "+ it.size());
-//                System.out.println("==>Finish Insert : "+ (System.currentTimeMillis()-start) + " ms");
+//                this.personRepository.saveAll(it);
             }catch(Exception e){
                 System.out.println("======Error=====");
                 System.out.println(e.getMessage());
